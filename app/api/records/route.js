@@ -1,7 +1,7 @@
 // /api/records/route.js
 
 import { NextResponse } from 'next/server';
-import { getCollection } from '@/lib/mongodb';
+import { getCollection } from '../../../lib/mongodb';
 
 export async function GET() {
     const records = await getCollection('records');
