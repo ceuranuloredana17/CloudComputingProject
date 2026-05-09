@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import Dashboard from "./components/Dashboard";
+import ChatAgent from "./components/ChatAgent";
 
 function parseCSV(text) {
   const lines = text.trim().split(/\r?\n/);
@@ -127,7 +128,12 @@ export default function DashboardPage() {
         </div>
       )}
 
-      {data && <Dashboard data={data} />}
+      {data && (
+        <div className="space-y-8">
+          <Dashboard data={data} />
+          <ChatAgent fileName={data.fileName} />
+        </div>
+      )}
     </div>
   );
 }
