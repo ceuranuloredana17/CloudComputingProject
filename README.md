@@ -102,7 +102,108 @@ Browser afișează răspunsul în interfața de chat
 
 ---
 
-### 4.3 Autentificare și autorizare servicii utilizate
+### 4.3 Exemple Request / Response
+
+#### `GET /api/csv` — Obține CSV-ul curent al utilizatorului
+
+**Request:**
+```http
+GET /api/csv HTTP/1.1
+Host: localhost:3000
+Cookie: __session=<clerk_session_token>
+```
+
+**Response 200 OK:**
+```json
+{
+  "_id": "664a1f2e3c8b4a001f2e3c8b",
+  "userId": "user_2abc123",
+  "fileName": "employees.csv",
+  "headers": ["Education", "JoiningYear", "City", "PaymentTier", "Age", "Gender"],
+  "rows": [
+    { "Education": "Bachelors", "JoiningYear": "2017", "City": "Bangalore", "PaymentTier": "3", "Age": "34", "Gender": "Male" }
+  ],
+  "uploadedAt": "2024-05-10T10:23:00.000Z"
+}
+```
+
+**Response 404** (niciun CSV încărcat):
+```json
+{ "error": "No CSV found" }
+```
+
+---
+
+#### `POST /api/csv` — Salvează un CSV nou
+
+**Request:**
+```http
+POST /api/csv HTTP/1.1
+Host: localhost:3000
+Content-Type: application/json
+Cookie: __session=<clerk_session_token>
+
+{
+  "fileName": "employees.csv",
+  "headers": ["Education", "JoiningYear", "City", "PaymentTier", "Age", "Gender"],
+  "rows": [
+    { "Education": "Bachelors", "JoiningYear": "2017", "City": "Bangalore", "PaymentTier": "3", "Age": "34", "Gender": "Male" }
+  ]
+}
+```
+
+**Response 200 OK:**
+```json
+{
+  "_id": "664a1f2e3c8b4a001f2e3c8b",
+  "userId": "user_2abc123",
+  "fileName": "employees.csv",
+  "headers": ["Education", "JoiningYear", "City", "PaymentTier", "Age", "Gender"],
+  "rows": [...],
+  "uploadedAt": "2024-05-10T10:23:00.000Z"
+}
+```
+
+---
+
+#### `POST /api/chat` — Întrebare către agentul AI
+
+**Request:**
+```http
+POST /api/chat HTTP/1.1
+Host: localhost:3000
+Content-Type: application/json
+Cookie: __session=<clerk_session_token>
+
+{
+  "question": "What percentage of employees with a Masters degree are Female?",
+  "history": [
+    { "role": "user", "content": "How many rows are in this dataset?" },
+    { "role": "assistant", "content": "The dataset contains 4653 rows." }
+  ]
+}
+```
+
+**Response 200 OK:**
+```json
+{
+  "answer": "Out of all employees with a Masters degree, approximately 38.5% are Female."
+}
+```
+
+**Response 401** (utilizator neautentificat):
+```json
+{ "error": "Unauthorized" }
+```
+
+**Response 404** (niciun CSV încărcat):
+```json
+{ "error": "No CSV data found. Please upload a file first." }
+```
+
+---
+
+### 4.4 Autentificare și autorizare servicii utilizate
 
 #### Clerk — autentificare utilizatori
 
