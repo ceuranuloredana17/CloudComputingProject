@@ -40,7 +40,7 @@ export default function ChatAgent({ fileName }) {
   const [messages, setMessages] = useState([
     {
       role: "assistant",
-      content: `Hi! I'm your AI data assistant powered by Gemini. I've loaded your file **${fileName}** and I'm ready to answer questions about it. What would you like to know?`,
+      content: `Hi! I'm your AI data assistant powered by OpenAI. I've loaded your file **${fileName}** and I'm ready to answer questions about it. What would you like to know?`,
     },
   ]);
   const [input, setInput] = useState("");
@@ -95,7 +95,7 @@ export default function ChatAgent({ fileName }) {
           <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-400 to-indigo-500 flex items-center justify-center text-white text-sm">✦</div>
           <div>
             <h2 className="text-sm font-semibold text-gray-800">AI Data Assistant</h2>
-            <p className="text-xs text-gray-400">powered by Gemini 2.0 Flash</p>
+            <p className="text-xs text-gray-400">powered by GPT-4o mini</p>
           </div>
         </div>
         <span className="text-xs bg-green-100 text-green-600 font-medium px-2.5 py-1 rounded-full">● Online</span>

@@ -6,19 +6,19 @@ Aplicație web pentru analiza datelor din fișiere CSV, cu vizualizări interact
 
 ## 1. Introducere
 
-Această aplicație web permite utilizatorilor autentificați să încarce fișiere CSV și să le analizeze vizual printr-un dashboard interactiv. Pe lângă grafice și statistici automate, aplicația integrează un agent AI (powered by Anthropic Claude) care poate răspunde în limbaj natural la întrebări despre datele încărcate.
+Această aplicație web permite utilizatorilor autentificați să încarce fișiere CSV și să le analizeze vizual printr-un dashboard interactiv. Pe lângă grafice și statistici automate, aplicația integrează un agent AI (powered by OpenAI) care poate răspunde în limbaj natural la întrebări despre datele încărcate.
 
 Proiectul utilizează **două servicii cloud**:
 
 - **MongoDB Atlas** — bază de date cloud pentru stocarea fișierelor CSV și a datelor utilizatorilor
-- **Anthropic Claude API** — model AI în cloud pentru analiza inteligentă a datelor
+- **OpenAI API** — model AI în cloud pentru analiza inteligentă a datelor
 
 **Stack tehnologic:**
 
 - Next.js 16 (App Router)
 - Clerk — autentificare utilizatori
 - MongoDB Atlas — stocare date în cloud
-- Anthropic Claude (claude-sonnet-4-6) API — agent AI în cloud
+- OpenAI (gpt-4o-mini) API — agent AI în cloud
 - Recharts — vizualizări grafice
 - Tailwind CSS — stilizare
 
@@ -48,7 +48,7 @@ Aplicația expune 3 endpoint-uri REST proprii și consumă 2 API-uri externe în
 | ----------- | ------ | ---------------------------------------------------------------- |
 | `/api/csv`  | `GET`  | Returnează cel mai recent CSV al utilizatorului autentificat     |
 | `/api/csv`  | `POST` | Salvează un fișier CSV nou în MongoDB Atlas                      |
-| `/api/chat` | `POST` | Trimite o întrebare la agentul AI Claude și returnează răspunsul |
+| `/api/chat` | `POST` | Trimite o întrebare la agentul AI OpenAI și returnează răspunsul |
 
 ### 3.2 API-uri externe utilizate
 
@@ -58,11 +58,11 @@ Aplicația expune 3 endpoint-uri REST proprii și consumă 2 API-uri externe în
 - Conexiune securizată TLS/SSL la un cluster Atlas în cloud
 - Autentificare prin connection string cu credențiale
 
-#### Anthropic Claude API
+#### OpenAI API
 
-- **SDK oficial:** `@anthropic-ai/sdk`
-- **Model:** `claude-sonnet-4-6`
-- **Autentificare:** API Key prin variabila de mediu `ANTHROPIC_API_KEY`
+- **SDK oficial:** `openai`
+- **Model:** `gpt-4o-mini`
+- **Autentificare:** API Key prin variabila de mediu `OPENAI_KEY`
 
 ---
 
@@ -93,7 +93,7 @@ MongoDB Atlas → fetch CSV al utilizatorului
     ↓
 Construire context AI (statistici numerice + primele 300 rânduri CSV)
     ↓
-POST Anthropic Claude API ← { model, system_prompt, messages: [history, question] }
+POST OpenAI API ← { model, messages: [system_prompt, history, question] }
     ↓
 Răspuns AI → POST /api/chat → { answer }
     ↓
@@ -119,10 +119,10 @@ if (!userId)
 - Fiecare utilizator vede **doar propriile date** — filtrare în MongoDB după `userId`
 - Rutele publice (sign-in, sign-up) sunt excluse din protecție prin `middleware.ts`
 
-#### Anthropic Claude API — autentificare serviciu cloud
+#### OpenAI API — autentificare serviciu cloud
 
-- Autentificare prin **API Key** stocat în variabila de mediu `ANTHROPIC_API_KEY`
-- Cheia este citită automat de SDK-ul oficial `@anthropic-ai/sdk`
+- Autentificare prin **API Key** stocat în variabila de mediu `OPENAI_KEY`
+- Cheia este transmisă prin SDK-ul oficial `openai` la inițializarea clientului
 - Cheia **nu este expusă niciodată** în client — folosită exclusiv pe server (Next.js Route Handler)
 
 #### MongoDB Atlas — autentificare serviciu cloud
@@ -145,7 +145,7 @@ NEXT_ATLAS_URI=<mongodb_connection_string>
 NEXT_ATLAS_DATABASE=CloudComputing
 NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=<clerk_publishable_key>
 CLERK_SECRET_KEY=<clerk_secret_key>
-ANTHROPIC_API_KEY=<anthropic_api_key>
+OPENAI_KEY=<openai_api_key>
 NEXT_PUBLIC_CLERK_SIGN_IN_URL=/sign-in
 NEXT_PUBLIC_CLERK_SIGN_UP_URL=/sign-up
 

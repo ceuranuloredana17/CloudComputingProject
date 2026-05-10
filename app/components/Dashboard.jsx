@@ -148,7 +148,7 @@ export default function Dashboard({ data }) {
           return (
             <div key={s.col} className={`bg-gradient-to-br ${bg} rounded-2xl p-5 text-white shadow-md`}>
               <p className="text-xs font-semibold uppercase tracking-wider opacity-80 mb-2 truncate">{s.col}</p>
-              <p className="text-4xl font-bold">{s.avg % 1 === 0 ? s.avg.toLocaleString() : s.avg.toFixed(1)}</p>
+              <p className="text-4xl font-bold">{Number.isInteger(s.avg) ? s.avg.toLocaleString() : s.avg.toFixed(1)}</p>
               <p className="text-xs opacity-70 mt-1">avg · {s.min} – {s.max}</p>
             </div>
           );

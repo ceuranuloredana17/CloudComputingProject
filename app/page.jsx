@@ -50,8 +50,8 @@ export default function DashboardPage() {
 
   useEffect(() => {
     fetch("/api/csv")
-      .then(r => r.json())
-      .then(d => setData(d))
+      .then(r => r.ok ? r.json() : null)
+      .then(d => { if (d && !d.error) setData(d); })
       .catch(() => setError("Failed to load data."))
       .finally(() => setLoading(false));
   }, []);

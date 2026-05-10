@@ -1,9 +1,9 @@
 import { NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 import { getCollection } from "../../../lib/mongodb";
-import Anthropic from "@anthropic-ai/sdk";
+import OpenAI from "openai";
 
-const client = new Anthropic();
+const client = new OpenAI({ apiKey: process.env.OPENAI_KEY });
 
 function buildContext(fileName, headers, rows) {
   const sample = rows.slice(0, 300);
@@ -59,18 +59,17 @@ export async function POST(request) {
     const systemPrompt = buildContext(upload.fileName, upload.headers, upload.rows);
 
     const messages = [
+      { role: "system", content: systemPrompt },
       ...(history || []),
       { role: "user", content: question },
     ];
 
-    const response = await client.messages.create({
-      model: "claude-sonnet-4-6",
-      max_tokens: 1024,
-      system: systemPrompt,
+    const response = await client.chat.completions.create({
+      model: "gpt-4o-mini",
       messages,
     });
 
-    const answer = response.content[0].text;
+    const answer = response.choices[0].message.content;
     return NextResponse.json({ answer });
   } catch (err) {
     console.error("Chat route error:", err?.message, err?.stack);
