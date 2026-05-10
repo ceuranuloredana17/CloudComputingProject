@@ -1,12 +1,9 @@
 import { NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 import { getCollection } from "../../../lib/mongodb";
-import OpenAI from "openai";
+import Anthropic from "@anthropic-ai/sdk";
 
-const gemini = new OpenAI({
-  apiKey: process.env.GEMINI_API_KEY,
-  baseURL: "https://generativelanguage.googleapis.com/v1beta/openai/",
-});
+const client = new Anthropic();
 
 function buildContext(fileName, headers, rows) {
   const sample = rows.slice(0, 300);
@@ -48,29 +45,35 @@ Instructions:
 }
 
 export async function POST(request) {
-  const { userId } = await auth();
-  if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  try {
+    const { userId } = await auth();
+    if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  const { question, history } = await request.json();
-  if (!question?.trim()) return NextResponse.json({ error: "No question provided" }, { status: 400 });
+    const { question, history } = await request.json();
+    if (!question?.trim()) return NextResponse.json({ error: "No question provided" }, { status: 400 });
 
-  const col = await getCollection("csv_uploads");
-  const upload = await col.findOne({ userId }, { sort: { uploadedAt: -1 } });
-  if (!upload) return NextResponse.json({ error: "No CSV data found. Please upload a file first." }, { status: 404 });
+    const col = await getCollection("csv_uploads");
+    const upload = await col.findOne({ userId }, { sort: { uploadedAt: -1 } });
+    if (!upload) return NextResponse.json({ error: "No CSV data found. Please upload a file first." }, { status: 404 });
 
-  const systemPrompt = buildContext(upload.fileName, upload.headers, upload.rows);
+    const systemPrompt = buildContext(upload.fileName, upload.headers, upload.rows);
 
-  const messages = [
-    { role: "system", content: systemPrompt },
-    ...(history || []),
-    { role: "user", content: question },
-  ];
+    const messages = [
+      ...(history || []),
+      { role: "user", content: question },
+    ];
 
-  const response = await gemini.chat.completions.create({
-    model: "gemini-2.0-flash",
-    messages,
-  });
+    const response = await client.messages.create({
+      model: "claude-sonnet-4-6",
+      max_tokens: 1024,
+      system: systemPrompt,
+      messages,
+    });
 
-  const answer = response.choices[0].message.content;
-  return NextResponse.json({ answer });
+    const answer = response.content[0].text;
+    return NextResponse.json({ answer });
+  } catch (err) {
+    console.error("Chat route error:", err?.message, err?.stack);
+    return NextResponse.json({ error: err?.message || "Internal server error" }, { status: 500 });
+  }
 }
